@@ -1,68 +1,44 @@
+type Env = {
+  ASSETS: {
+    fetch(request: Request): Promise<Response>;
+  };
+};
+
 export default {
-  async fetch(request: Request, env: any): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     try {
       const url = new URL(request.url);
-      let pathname = url.pathname;
+      const pathname = url.pathname;
 
-      // For root path, serve index.html
+      // Check if ASSETS is available
+      if (!env.ASSETS) {
+        return new Response('ASSETS binding not found', { status: 500 });
+      }
+
+      // Check if it has fetch
+      if (typeof env.ASSETS.fetch !== 'function') {
+        return new Response('ASSETS.fetch is not a function', { status: 500 });
+      }
+
+      // Try to serve root index.html
       if (pathname === '/' || pathname === '') {
-        const response = await env.ASSETS.fetch(
-          new Request(new URL('/index.html', url.origin).toString(), request)
-        );
-        return new Response(response.body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        });
+        const req = new Request('https://example.com/index.html');
+        return env.ASSETS.fetch(req);
       }
 
-      // Try to serve the requested file
-      let response = await env.ASSETS.fetch(request.clone());
+      // Try the requested path
+      const req = new Request('https://example.com' + pathname);
+      let res = await env.ASSETS.fetch(req);
 
-      // If the file is not found and it doesn't have an extension,
-      // serve index.html for SPA routing
-      if (response.status === 404 && !pathname.includes('.')) {
-        const indexResponse = await env.ASSETS.fetch(
-          new Request(new URL('/index.html', url.origin).toString(), request)
-        );
-        return new Response(indexResponse.body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        });
+      // Fallback to index.html for SPA
+      if (res.status === 404 && !pathname.includes('.')) {
+        const indexReq = new Request('https://example.com/index.html');
+        return env.ASSETS.fetch(indexReq);
       }
 
-      // Ensure JavaScript files have the correct MIME type
-      if (pathname.endsWith('.js')) {
-        const headers = new Headers(response.headers);
-        headers.set('Content-Type', 'application/javascript; charset=utf-8');
-        headers.set('X-Content-Type-Options', 'nosniff');
-        return new Response(response.body, {
-          status: response.status,
-          headers,
-        });
-      }
-
-      // Add security headers
-      if (response.status === 200 && pathname.endsWith('.css')) {
-        const headers = new Headers(response.headers);
-        headers.set('Content-Type', 'text/css; charset=utf-8');
-        return new Response(response.body, {
-          status: response.status,
-          headers,
-        });
-      }
-
-      return response;
+      return res;
     } catch (err) {
-      console.error('Error fetching asset:', err);
-      return new Response('Internal Server Error', { status: 500 });
+      return new Response(`Error: ${err instanceof Error ? err.message : String(err)}`, { status: 500 });
     }
   },
 };
