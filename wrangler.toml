@@ -5,11 +5,3 @@ compatibility_date = "2024-12-16"
 
 [site]
 bucket = "frontend/dist"
-
-[[migrations]]
-tag = "v1"
-new_sqlite_schema = true
-
-[[r2_buckets]]
-binding = "STATIC_ASSETS"
-bucket_name = "aquamind-static"
