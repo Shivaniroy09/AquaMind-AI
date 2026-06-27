@@ -1,2 +1,1 @@
 # AquaMind-AI
-# AquaMind-AI
