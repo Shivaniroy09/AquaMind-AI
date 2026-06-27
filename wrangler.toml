@@ -1,6 +1,5 @@
 name = "aquamind-platform"
 main = "src/index.ts"
-type = "javascript"
 compatibility_date = "2024-12-16"
 
 [site]
