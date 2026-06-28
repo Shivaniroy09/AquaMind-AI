@@ -3,9 +3,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models import domain as models
 from app.api.auth import get_current_user
-import joblib
-import pandas as pd
-import numpy as np
+try:
+    import joblib
+    import pandas as pd
+    import numpy as np
+except ImportError:
+    pass
 import os
 
 router = APIRouter()

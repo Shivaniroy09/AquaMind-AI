@@ -6,8 +6,4 @@ pydantic
 pydantic-settings
 passlib[bcrypt]
 python-jose[cryptography]
-scikit-learn
-pandas
-numpy
-joblib
 python-multipart
