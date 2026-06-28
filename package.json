@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "npm run build:frontend && wrangler deploy",
-    "build:frontend": "cd frontend && npm run build"
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run build:frontend"
   },
   "devDependencies": {
     "wrangler": "^3.82.0"

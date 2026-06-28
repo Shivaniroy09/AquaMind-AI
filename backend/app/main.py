@@ -3,8 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, usage, ai, admin
 from app.core.database import engine, Base
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables safely
+import logging
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    logging.warning(f"Could not connect to database on startup: {e}")
+    logging.warning("Please ensure DATABASE_URL is correctly set in environment variables.")
 
 app = FastAPI(title="AquaMind AI API", version="1.0.0")
 
